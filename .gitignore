@@ -22,7 +22,7 @@ log/
 *.iml
 *.ipr
 /idea
-
+*/.idea
 
 ### mac ###
 */.DS_Store
