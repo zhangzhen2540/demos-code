@@ -2,6 +2,8 @@ package org.example.demo.rabbitmq;
 
 import com.rabbitmq.client.*;
 import lombok.SneakyThrows;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.IOException;
 import java.util.Map;
@@ -23,13 +25,27 @@ public class App {
     public static void main(String[] args) {
 
         // ceshi
-        Connection connection = RabbitmqConnUtil.getConnection();
+//        Connection connection = RabbitmqConnUtil.getConnection();
+//        sendAndClose(connection);
+////        useAloneThread(connection);
+//        Thread.sleep(300);
+//        connection.close();
 
-        sendAndClose(connection);
-//        useAloneThread(connection);
-
-        connection.close();
+        rabbitTemplate();
     }
+
+    private static void rabbitTemplate() {
+        CachingConnectionFactory cf = new CachingConnectionFactory();
+        cf.setHost(RabbitmqConnUtil.RABBITMQ_HOST);
+        cf.setPort(RabbitmqConnUtil.RABBITMQ_PORT);
+        cf.setUsername(RabbitmqConnUtil.RABBITMQ_USERNAME);
+        cf.setPassword(RabbitmqConnUtil.RABBITMQ_PASSWORD);
+
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(cf);
+
+        rabbitTemplate.convertAndSend(exchange, bindingKey, "hello world");
+    }
+
 
     @SneakyThrows
     private static void sendAndClose(Connection connection) {
@@ -53,6 +69,7 @@ public class App {
 
         channel.basicPublish(exchange, bindingKey, new AMQP.BasicProperties.Builder().contentEncoding("UTF-8").build(),
                 "hello world".getBytes());
+
         channel.close();
     }
 
